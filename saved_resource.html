@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.dom.min.js" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.sound.min.js" crossorigin=""></script>
+<script src="https://assets.editor.p5js.org/5f3f15371549c10024ce32fc/5ab825b3-564f-4dca-bdca-77857be55773.js" crossorigin=""></script>
+    
+    
+
+  <!--<base href="https://editor.p5js.org/devil6668787/sketches/pga0J755R/">--><base href="."><style>
+ html, body {
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  display: block;
+}
+</style><script src="https://editor.p5js.org/previewScripts.js"></script><style data-emotion=""></style><script>
+    function getScriptOff(line) {
+      var offs = [[72,"sketch"]];
+      var l = 0;
+      var file = '';
+      for (var i=0; i<offs.length; i++) {
+        var n = offs[i][0];
+        if (n < line && n > l) {
+          l = n;
+          file = offs[i][1];
+        }
+      }
+      return [line - l, file];
+    }
+    // catch reference errors, via http://stackoverflow.com/a/12747364/2994108
+    window.onerror = function (msg, url, lineNumber, columnNo, error) {
+        var string = msg.toLowerCase();
+        var substring = "script error";
+        var data = {};
+        if (url.match(/^(http:\/\/|https:\/\/)/) !== null && error.stack){
+          var errorNum = error.stack.split('about:srcdoc:')[1].split(':')[0];
+          var fileInfo = getScriptOff(errorNum);
+          data = msg + ' (' + fileInfo[1] + ': line ' + fileInfo[0] + ')';
+        } else {
+          var fileInfo = getScriptOff(lineNumber);
+          data = msg + ' (' + fileInfo[1] + ': line ' + fileInfo[0] + ')';
+        }
+        window.parent.postMessage([{
+          log: [{
+            method: 'error',
+            data: [data],
+            id: Date.now().toString()
+          }],
+          source: fileInfo[1]
+        }], '*');
+      return false;
+    };
+    // catch rejected promises
+    window.onunhandledrejection = function (event) {
+      if (event.reason && event.reason.message && event.reason.stack){
+        var errorNum = event.reason.stack.split('about:srcdoc:')[1].split(':')[0];
+        var fileInfo = getScriptOff(errorNum);
+        var data = event.reason.message + ' (' + fileInfo[1] + ': line ' + fileInfo[0] + ')';
+        window.parent.postMessage([{
+          log: [{
+            method: 'error',
+            data: [data],
+            id: Date.now().toString()
+          }],
+          source: fileInfo[1]
+        }], '*');
+      }
+    };
+  </script></head>
+  <body>
+      <script data-tag="@fs-sketch.js">var tower, towerImage
+var  climber, climberImage, climbersGroup
+var door, doorImage, doorsGroup
+var ghost, ghostImage
+var gameState = "play"
+var invisibleBar, InvisibleBarGroup
+var sound
+
+function preload(){
+  towerImage=loadImage("https://assets.editor.p5js.org/5f3f15371549c10024ce32fc/e12fb21a-9cbe-4379-86d3-f938aa902a7c.png")
+  doorImage=loadImage("https://assets.editor.p5js.org/5f3f15371549c10024ce32fc/76efaeac-59d7-4b48-83d0-6e57292cf7a5.png")
+  climberImage=loadImage("https://assets.editor.p5js.org/5f3f15371549c10024ce32fc/449af6b5-c1a7-4042-931a-c777879db3af.png")
+  ghostImage=loadImage("https://assets.editor.p5js.org/5f3f15371549c10024ce32fc/f7bfc048-79c9-4717-9db6-908cea883e3c.png")
+  sound=loadSound("https://assets.editor.p5js.org/5f3f15371549c10024ce32fc/694f7ebb-382e-428d-81c2-f6cd31f2985b.wav")
+}
+
+
+function setup(){
+  
+  createCanvas(600,600)
+  sound.loop()
+  tower=createSprite(300,300)
+  tower.addImage(towerImage)
+  tower.velocityY=2  
+  
+  ghost=createSprite(200,200,50,50)
+  ghost.addImage(ghostImage)
+  ghost.scale=0.3
+  doorsGroup=new Group()
+  
+  climbersGroup=new Group()
+  
+  invisibleBarGroup=new Group()
+}
+
+function draw(){
+  background("black")
+  
+  if (gameState === "play") {
+    if(keyDown("left_arrow")){
+      ghost.x = ghost.x - 3;
+    }
+    
+    if(keyDown("right_arrow")){
+      ghost.x = ghost.x + 3;
+    }
+    
+    if(keyDown("space")){
+      ghost.velocityY = -10;
+    }
+    
+    ghost.velocityY = ghost.velocityY + 0.8
+    
+  
+  if(tower.y>400){
+    tower.y=300
+      
+  }
+  
+  spawnDoors()
+  
+        //climbersGroup.collide(ghost);
+    if(climbersGroup.isTouching(ghost)){
+      ghost.velocityY = 0;
+    }
+    
+    if(invisibleBarGroup.isTouching(ghost)){
+      
+      ghost.destroy()
+    }
+  drawSprites()
+  }
+  if (gameState === "end"){
+    stroke("yellow");
+    fill("yellow");
+    textSize(30);
+    text("Game Over", 230,250)
+  }
+}
+
+function spawnDoors(){
+  
+  if(frameCount%250===0){
+   var door=createSprite(200,-40) 
+  door.addImage(doorImage); 
+  
+    var climber=createSprite(200,10)
+    climber.addImage(climberImage)
+    
+    door.x=Math.round(random(120,400))
+    climber.x=door.x
+    climber.lifetime=800
+    climbersGroup.add(climber)
+    climber.velocityY=2
+    door.velocityY=2
+    
+    door.lifetime=800
+    doorsGroup.add(door)
+    door.depth=ghost.depth
+    ghost.depth+=1
+    var invisibleBar=createSprite(200,15)
+    invisibleBar.width=climber.width
+    invisibleBar.height=2
+    invisibleBar.x=door.x
+    invisibleBar.velocityY=2
+    invisibleBarGroup.add(invisibleBar)
+  }
+  
+  
+
+  
+}
+</script>
+  
+
+<canvas id="defaultCanvas0" class="p5Canvas" width="600" height="600" style="width: 600px; height: 600px;"></canvas></body></html>
